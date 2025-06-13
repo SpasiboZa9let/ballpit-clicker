@@ -1,31 +1,43 @@
 import * as THREE from 'https://cdn.skypack.dev/three@0.152.2';
+import { createRenderer } from './renderer.js';
+import { Engine } from './physics/engine.js';
 
-export function createScene(canvas) {
-  const scene = new THREE.Scene();
+export default function Ballpit(canvas, options = {}) {
+  const container = canvas.parentNode;
 
-  const ambient = new THREE.AmbientLight(0xffffff, 0.4);
-  const directional = new THREE.DirectionalLight(0xffffff, 0.8);
-  directional.position.set(5, 5, 10);
+  const renderer = createRenderer(container);
+  const scene = renderer.scene;
+  const camera = renderer.camera;
 
-  scene.add(ambient);
-  scene.add(directional);
+  const maxX = window.innerWidth / 100;
+  const maxY = window.innerHeight / 100;
 
-  const camera = new THREE.PerspectiveCamera(45, 1, 0.1, 100);
-  camera.position.set(0, 0, 20);
+  camera.position.set(0, 0, Math.max(maxX, maxY) * 2.5);
+  camera.lookAt(0, 0, 0);
 
-  const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true });
-  renderer.setSize(window.innerWidth, window.innerHeight);
-  renderer.setPixelRatio(window.devicePixelRatio);
-  renderer.outputEncoding = THREE.sRGBEncoding;
-  renderer.toneMapping = THREE.ACESFilmicToneMapping;
-
-  window.addEventListener('resize', () => {
-    camera.aspect = window.innerWidth / window.innerHeight;
-    camera.updateProjectionMatrix();
-    renderer.setSize(window.innerWidth, window.innerHeight);
+  const engine = new Engine({
+    count: options.count || 100,
+    maxX,
+    maxY,
+    gravity: options.gravity ?? 0.3,
+    friction: options.friction ?? 0.95,
+    wallBounce: options.wallBounce ?? 0.9,
+    followCursor: options.followCursor ?? true,
   });
 
-  const raycaster = new THREE.Raycaster();
+  scene.add(engine.mesh);
 
-  return { scene, camera, renderer, raycaster };
+  renderer.onFrame((delta) => {
+    engine.update(delta);
+    renderer.render();
+  });
+
+  window.addEventListener('resize', () => location.reload());
+
+  return {
+    dispose() {
+      renderer.dispose();
+      engine.dispose();
+    }
+  };
 }
