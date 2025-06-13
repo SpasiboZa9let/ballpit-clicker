@@ -1,8 +1,8 @@
-import * as THREE from 'three';
+import * as THREE from 'https://cdn.skypack.dev/three@0.152.2';
 import { createRenderer } from './renderer.js';
 import { Engine } from './physics/engine.js';
 
-export function Ballpit(canvas, options = {}) {
+export default function Ballpit(canvas, options = {}) {
   const container = canvas.parentNode;
 
   const renderer = createRenderer(container);
@@ -32,7 +32,6 @@ export function Ballpit(canvas, options = {}) {
     renderer.render();
   });
 
-  // Хендлер ресайза — пока простая перезагрузка
   window.addEventListener('resize', () => location.reload());
 
   return {
