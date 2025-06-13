@@ -6,7 +6,6 @@ let raycaster, camera, scene, renderer, balls;
 export function createBallpit(canvas, config = {}) {
   ({ scene, camera, renderer, raycaster } = createScene(canvas));
 
-  // фиксированная "арена"
   const arena = {
     maxX: 10,
     maxY: 6
