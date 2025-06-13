@@ -1,22 +1,35 @@
-import { createBallpit } from './ballpit/Ballpit.js';
+import { createPhysics } from './ballpit/physics.js';
+import { createRenderer } from './ballpit/renderer.js';
 
-const canvas = document.createElement('canvas');
-canvas.id = 'main-canvas';
-document.getElementById('app').appendChild(canvas);
+const container = document.getElementById('canvas-container');
 
-let score = 0;
-const scoreEl = document.getElementById('score');
+const renderer = createRenderer(container);
 
-const pit = createBallpit(canvas, {
-  count: 150,
-  followCursor: true,
+// Размеры арены зависят от ширины/высоты окна
+const maxX = window.innerWidth / 100;
+const maxY = window.innerHeight / 100;
+
+const physics = createPhysics({
+  count: 100,
+  maxX,
+  maxY,
+  gravity: 0.2,
+  friction: 0.98,
 });
 
-canvas.addEventListener('click', (event) => {
-  const clicked = pit.tryClick(event);
-  if (clicked) {
-    score += 1;
-    scoreEl.textContent = score;
-  }
+renderer.scene.add(physics.mesh);
+
+// Позиция камеры — на центр арены, отдалена в 2.5 раза от максимального размера
+renderer.camera.position.set(0, 0, Math.max(maxX, maxY) * 2.5);
+renderer.camera.lookAt(0, 0, 0);
+
+// Рендерим каждый кадр
+renderer.onFrame((delta) => {
+  physics.update(delta);
+  renderer.render();
 });
 
+// При ресайзе — обновляем страницу (на потом — динамический пересчёт)
+window.addEventListener('resize', () => {
+  location.reload();
+});
