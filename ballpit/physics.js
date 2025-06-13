@@ -1,14 +1,6 @@
-import {
-  InstancedMesh,
-  SphereGeometry,
-  MeshStandardMaterial,
-  Object3D,
-  Vector3,
-  PlaneGeometry,
-  Mesh
-} from 'three';
+import * as THREE from 'https://cdn.skypack.dev/three@0.152.2';
 
-const tempObject = new Object3D();
+const tempObject = new THREE.Object3D();
 
 export function createPhysics(config) {
   const {
@@ -19,18 +11,18 @@ export function createPhysics(config) {
     friction = 0.98
   } = config;
 
-  const geometry = new SphereGeometry(0.3, 16, 16);
-  const material = new MeshStandardMaterial({ color: 0x66ccff });
-  const instanced = new InstancedMesh(geometry, material, count);
+  const geometry = new THREE.SphereGeometry(0.3, 16, 16);
+  const material = new THREE.MeshStandardMaterial({ color: 0x66ccff });
+  const instanced = new THREE.InstancedMesh(geometry, material, count);
 
   const positions = [];
   const velocities = [];
 
-  const spawnPosition = new Vector3(0, maxY, 0);
+  const spawnPosition = new THREE.Vector3(0, maxY, 0);
 
   for (let i = 0; i < count; i++) {
     const pos = spawnPosition.clone();
-    const vel = new Vector3(
+    const vel = new THREE.Vector3(
       (Math.random() - 0.5) * 0.3,
       -Math.random() * 0.3,
       0
@@ -85,7 +77,7 @@ export function createPhysics(config) {
     if (intersects.length > 0) {
       const index = intersects[0].instanceId;
       if (index !== undefined) {
-        velocities[index].add(new Vector3(0, 1, 0));
+        velocities[index].add(new THREE.Vector3(0, 1, 0));
         return true;
       }
     }
@@ -93,13 +85,13 @@ export function createPhysics(config) {
     return false;
   }
 
-  const floor = new Mesh(
-    new PlaneGeometry(maxX * 2, 0.3),
-    new MeshStandardMaterial({ color: 0x333333 })
+  const floor = new THREE.Mesh(
+    new THREE.PlaneGeometry(maxX * 2, 0.3),
+    new THREE.MeshStandardMaterial({ color: 0x333333 })
   );
   floor.position.set(0, -maxY, 0);
 
-  const group = new Object3D();
+  const group = new THREE.Object3D();
   group.add(instanced);
   group.add(floor);
 
