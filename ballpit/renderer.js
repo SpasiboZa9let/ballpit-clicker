@@ -4,11 +4,21 @@ import {
   WebGLRenderer,
   sRGBEncoding,
   ACESFilmicToneMapping,
-  Raycaster
+  Raycaster,
+  AmbientLight,
+  DirectionalLight
 } from 'three';
 
 export function createScene(canvas) {
   const scene = new Scene();
+
+  // добавляем освещение
+  const ambient = new AmbientLight(0xffffff, 0.4); // мягкий фоновый свет
+  const directional = new DirectionalLight(0xffffff, 0.8); // направленный свет
+  directional.position.set(5, 5, 10);
+
+  scene.add(ambient);
+  scene.add(directional);
 
   const camera = new PerspectiveCamera(45, 1, 0.1, 100);
   camera.position.set(0, 0, 20);
@@ -29,4 +39,3 @@ export function createScene(canvas) {
 
   return { scene, camera, renderer, raycaster };
 }
-
