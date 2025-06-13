@@ -1,5 +1,5 @@
 import * as THREE from 'https://cdn.skypack.dev/three@0.152.2';
-import { createRenderer } from './renderer.js';
+import  createRenderer  from './renderer.js';
 import { Engine } from './physics/engine.js';
 
 export default function Ballpit(canvas, options = {}) {
