@@ -4,7 +4,6 @@ import {
   MeshStandardMaterial,
   Object3D,
   Vector3,
-  Color,
   PlaneGeometry,
   Mesh
 } from 'three';
@@ -22,22 +21,20 @@ export function createPhysics(config) {
 
   const geometry = new SphereGeometry(0.3, 16, 16);
   const material = new MeshStandardMaterial({ color: 0x66ccff });
-  const mesh = new InstancedMesh(geometry, material, count);
+  const instanced = new InstancedMesh(geometry, material, count);
 
   const positions = [];
   const velocities = [];
 
-  // форточка — в центре сверху
   const spawnPosition = new Vector3(0, maxY, 0);
 
   for (let i = 0; i < count; i++) {
     const pos = spawnPosition.clone();
     const vel = new Vector3(
-      (Math.random() - 0.5) * 0.3, // X — в стороны
-      -Math.random() * 0.3,        // Y — вниз
+      (Math.random() - 0.5) * 0.3,
+      -Math.random() * 0.3,
       0
     );
-
     positions.push(pos);
     velocities.push(vel);
   }
@@ -51,13 +48,11 @@ export function createPhysics(config) {
       v.multiplyScalar(friction);
       p.add(v);
 
-      // столкновения с полом
       if (p.y < -maxY) {
         p.y = -maxY;
         v.y *= -1;
       }
 
-      // стены
       if (p.x < -maxX || p.x > maxX) {
         p.x = Math.sign(p.x) * maxX;
         v.x *= -1;
@@ -65,10 +60,10 @@ export function createPhysics(config) {
 
       tempObject.position.copy(p);
       tempObject.updateMatrix();
-      mesh.setMatrixAt(i, tempObject.matrix);
+      instanced.setMatrixAt(i, tempObject.matrix);
     }
 
-    mesh.instanceMatrix.needsUpdate = true;
+    instanced.instanceMatrix.needsUpdate = true;
   }
 
   function handleClick(event, camera, raycaster) {
@@ -85,12 +80,12 @@ export function createPhysics(config) {
     };
 
     raycaster.setFromCamera(mouse, camera);
-    const intersects = raycaster.intersectObject(mesh);
+    const intersects = raycaster.intersectObject(instanced);
 
     if (intersects.length > 0) {
       const index = intersects[0].instanceId;
       if (index !== undefined) {
-        velocities[index].add(new Vector3(0, 1, 0)); // подпрыгнуть
+        velocities[index].add(new Vector3(0, 1, 0));
         return true;
       }
     }
@@ -98,7 +93,6 @@ export function createPhysics(config) {
     return false;
   }
 
-  // пол как визуальный ориентир
   const floor = new Mesh(
     new PlaneGeometry(maxX * 2, 0.3),
     new MeshStandardMaterial({ color: 0x333333 })
@@ -106,7 +100,7 @@ export function createPhysics(config) {
   floor.position.set(0, -maxY, 0);
 
   const group = new Object3D();
-  group.add(mesh);
+  group.add(instanced);
   group.add(floor);
 
   return {
