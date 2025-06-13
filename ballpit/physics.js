@@ -85,15 +85,36 @@ export function createPhysics(config) {
     return false;
   }
 
-  const floor = new THREE.Mesh(
-    new THREE.PlaneGeometry(maxX * 2, 0.3),
-    new THREE.MeshStandardMaterial({ color: 0x333333 })
+  // 👇 создаём рамку (окно)
+  const wallMaterial = new THREE.MeshStandardMaterial({ color: 0x993333 });
+
+  const wallThickness = 0.2;
+  const wallDepth = 0.1;
+
+  const leftWall = new THREE.Mesh(
+    new THREE.BoxGeometry(wallThickness, maxY * 2, wallDepth),
+    wallMaterial
   );
-  floor.position.set(0, -maxY, 0);
+  leftWall.position.set(-maxX - wallThickness / 2, 0, 0);
+
+  const rightWall = new THREE.Mesh(
+    new THREE.BoxGeometry(wallThickness, maxY * 2, wallDepth),
+    wallMaterial
+  );
+  rightWall.position.set(maxX + wallThickness / 2, 0, 0);
+
+  const bottomWall = new THREE.Mesh(
+    new THREE.BoxGeometry(maxX * 2 + wallThickness * 2, wallThickness, wallDepth),
+    wallMaterial
+  );
+  bottomWall.position.set(0, -maxY - wallThickness / 2, 0);
+
+  const wallGroup = new THREE.Group();
+  wallGroup.add(leftWall, rightWall, bottomWall);
 
   const group = new THREE.Object3D();
   group.add(instanced);
-  group.add(floor);
+  group.add(wallGroup);
 
   return {
     mesh: group,
