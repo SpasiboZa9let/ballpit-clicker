@@ -2,29 +2,27 @@ import * as THREE from 'https://cdn.skypack.dev/three@0.152.2';
 
 export function createArena(maxX, maxY) {
   const wallMaterial = new THREE.MeshStandardMaterial({ color: 0x993333 });
-  const wallThickness = 0.2;
-  const wallDepth = 0.1;
+  const thickness = 0.2;
 
   const left = new THREE.Mesh(
-    new THREE.BoxGeometry(wallThickness, maxY * 2, wallDepth),
+    new THREE.BoxGeometry(thickness, maxY * 2, 0.1),
     wallMaterial
   );
-  left.position.set(-maxX - wallThickness / 2, 0, 0);
+  left.position.set(-maxX - thickness / 2, 0, 0);
 
   const right = new THREE.Mesh(
-    new THREE.BoxGeometry(wallThickness, maxY * 2, wallDepth),
+    new THREE.BoxGeometry(thickness, maxY * 2, 0.1),
     wallMaterial
   );
-  right.position.set(maxX + wallThickness / 2, 0, 0);
+  right.position.set(maxX + thickness / 2, 0, 0);
 
   const bottom = new THREE.Mesh(
-    new THREE.BoxGeometry(maxX * 2 + wallThickness * 2, wallThickness, wallDepth),
+    new THREE.BoxGeometry(maxX * 2 + thickness * 2, thickness, 0.1),
     wallMaterial
   );
-  bottom.position.set(0, -maxY - wallThickness / 2, 0);
+  bottom.position.set(0, -maxY - thickness / 2, 0);
 
   const group = new THREE.Group();
   group.add(left, right, bottom);
   return group;
 }
-
