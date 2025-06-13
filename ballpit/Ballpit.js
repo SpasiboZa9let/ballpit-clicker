@@ -12,8 +12,13 @@ export default function Ballpit(canvas, options = {}) {
   const maxX = window.innerWidth / 100;
   const maxY = window.innerHeight / 100;
 
-  camera.position.set(0, 0, Math.max(maxX, maxY) * 2.5);
-  camera.lookAt(0, 0, 0);
+ const maxX = options.maxX ?? window.innerWidth / 100;
+const maxY = options.maxY ?? window.innerHeight / 100;
+
+// Центрируем камеру по X и Y, и ставим Z на нужную глубину
+camera.position.set(0, 0, Math.max(maxX, maxY) * 2.5);
+camera.lookAt(0, 0, 0);
+
 
   const engine = new Engine({
     count: options.count || 100,
