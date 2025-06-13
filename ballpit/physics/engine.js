@@ -1,49 +1,27 @@
-import { Arena } from './arena.js';
+import * as THREE from 'https://cdn.skypack.dev/three@0.152.2';
 import { Spawner } from './spawner.js';
+import { createArena } from './arena.js';
+import { createClickHandler } from './clickHandler.js';
 
 export class Engine {
   constructor(config) {
     this.config = config;
 
-    this.arena = new Arena(config);
+    this.arena = createArena(config.maxX, config.maxY);
     this.spawner = new Spawner(config);
 
-    this.mesh = this.spawner.mesh;
-    this.balls = this.spawner.balls;
-    this.maxX = config.maxX;
-    this.maxY = config.maxY;
+    this.mesh = new THREE.Group();
+    this.mesh.add(this.spawner.mesh);
+    this.mesh.add(this.arena);
+
+    this.handleClick = createClickHandler(this.spawner.mesh, this.spawner.balls);
   }
 
-  update(delta) {
-    for (const ball of this.balls) {
-      ball.velocity.y -= this.config.gravity * delta;
-      ball.position.add(ball.velocity);
+  update() {
+    this.spawner.update(this.config);
+  }
 
-      // Стенки арены
-      if (Math.abs(ball.position.x) > this.maxX) {
-        ball.position.x = Math.sign(ball.position.x) * this.maxX;
-        ball.velocity.x *= -this.config.friction;
-      }
-
-      if (ball.position.y < -this.maxY) {
-        ball.position.y = -this.maxY;
-        ball.velocity.y *= -this.config.friction;
-      }
-
-      if (Math.abs(ball.position.y) > this.maxY) {
-        ball.position.y = Math.sign(ball.position.y) * this.maxY;
-        ball.velocity.y *= -this.config.friction;
-      }
-
-      if (Math.abs(ball.position.z) > this.maxX) {
-        ball.position.z = Math.sign(ball.position.z) * this.maxX;
-        ball.velocity.z *= -this.config.friction;
-      }
-
-      ball.updateMatrix();
-      this.mesh.setMatrixAt(ball.index, ball.matrix);
-    }
-
-    this.mesh.instanceMatrix.needsUpdate = true;
+  dispose() {
+    this.mesh.clear();
   }
 }
