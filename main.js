@@ -1,4 +1,4 @@
-import { Ballpit } from './ballpit/Ballpit.js';
+import Ballpit from './ballpit/Ballpit.js';
 
 const canvas = document.getElementById('canvas');
 
@@ -7,5 +7,5 @@ Ballpit(canvas, {
   gravity: 0.6,
   friction: 0.9,
   wallBounce: 0.95,
-  followCursor: true
+  followCursor: true,
 });
