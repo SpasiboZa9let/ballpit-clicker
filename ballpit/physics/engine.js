@@ -1,36 +1,49 @@
-import * as THREE from 'https://cdn.skypack.dev/three@0.152.2';
+import { Arena } from './arena.js';
+import { Spawner } from './spawner.js';
 
-export function createPhysicsEngine(positions, velocities, config) {
-  const { gravity = 0.07, friction = 0.98, maxX = 10, maxY = 5 } = config;
-  const tempObject = new THREE.Object3D();
+export class Engine {
+  constructor(config) {
+    this.config = config;
 
-  function update(instancedMesh) {
-    for (let i = 0; i < positions.length; i++) {
-      const p = positions[i];
-      const v = velocities[i];
+    this.arena = new Arena(config);
+    this.spawner = new Spawner(config);
 
-      v.y -= gravity;
-      v.multiplyScalar(friction);
-      p.add(v);
-
-      if (p.y < -maxY) {
-        p.y = -maxY;
-        v.y *= -1;
-      }
-
-      if (p.x < -maxX || p.x > maxX) {
-        p.x = Math.sign(p.x) * maxX;
-        v.x *= -1;
-      }
-
-      tempObject.position.copy(p);
-      tempObject.updateMatrix();
-      instancedMesh.setMatrixAt(i, tempObject.matrix);
-    }
-
-    instancedMesh.instanceMatrix.needsUpdate = true;
+    this.mesh = this.spawner.mesh;
+    this.balls = this.spawner.balls;
+    this.maxX = config.maxX;
+    this.maxY = config.maxY;
   }
 
-  return { update };
-}
+  update(delta) {
+    for (const ball of this.balls) {
+      ball.velocity.y -= this.config.gravity * delta;
+      ball.position.add(ball.velocity);
 
+      // Стенки арены
+      if (Math.abs(ball.position.x) > this.maxX) {
+        ball.position.x = Math.sign(ball.position.x) * this.maxX;
+        ball.velocity.x *= -this.config.friction;
+      }
+
+      if (ball.position.y < -this.maxY) {
+        ball.position.y = -this.maxY;
+        ball.velocity.y *= -this.config.friction;
+      }
+
+      if (Math.abs(ball.position.y) > this.maxY) {
+        ball.position.y = Math.sign(ball.position.y) * this.maxY;
+        ball.velocity.y *= -this.config.friction;
+      }
+
+      if (Math.abs(ball.position.z) > this.maxX) {
+        ball.position.z = Math.sign(ball.position.z) * this.maxX;
+        ball.velocity.z *= -this.config.friction;
+      }
+
+      ball.updateMatrix();
+      this.mesh.setMatrixAt(ball.index, ball.matrix);
+    }
+
+    this.mesh.instanceMatrix.needsUpdate = true;
+  }
+}
