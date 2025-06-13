@@ -4,12 +4,12 @@ import {
   MeshStandardMaterial,
   Object3D,
   Vector3,
-  Color
+  Color,
+  PlaneGeometry,
+  Mesh
 } from 'three';
 
 const tempObject = new Object3D();
-const tempPosition = new Vector3();
-const tempColor = new Color();
 
 export function createPhysics(config) {
   const {
@@ -27,13 +27,19 @@ export function createPhysics(config) {
   const positions = [];
   const velocities = [];
 
-  for (let i = 0; i < count; i++) {
-    const x = (Math.random() - 0.5) * maxX * 2;
-    const y = (Math.random() - 0.5) * maxY * 2;
-    const z = 0;
+  // форточка — в центре сверху
+  const spawnPosition = new Vector3(0, maxY, 0);
 
-    positions.push(new Vector3(x, y, z));
-    velocities.push(new Vector3((Math.random() - 0.5) * 0.1, (Math.random() - 0.5) * 0.1, 0));
+  for (let i = 0; i < count; i++) {
+    const pos = spawnPosition.clone();
+    const vel = new Vector3(
+      (Math.random() - 0.5) * 0.3, // X — в стороны
+      -Math.random() * 0.3,        // Y — вниз
+      0
+    );
+
+    positions.push(pos);
+    velocities.push(vel);
   }
 
   function update() {
@@ -45,13 +51,13 @@ export function createPhysics(config) {
       v.multiplyScalar(friction);
       p.add(v);
 
-      // отскок от пола
+      // столкновения с полом
       if (p.y < -maxY) {
         p.y = -maxY;
         v.y *= -1;
       }
 
-      // отскок от стен
+      // стены
       if (p.x < -maxX || p.x > maxX) {
         p.x = Math.sign(p.x) * maxX;
         v.x *= -1;
@@ -66,7 +72,7 @@ export function createPhysics(config) {
   }
 
   function handleClick(event, camera, raycaster) {
-    const rect = mesh.renderer?.domElement?.getBoundingClientRect?.() || {
+    const rect = raycaster.domElement?.getBoundingClientRect?.() || {
       left: 0,
       top: 0,
       width: window.innerWidth,
@@ -92,10 +98,20 @@ export function createPhysics(config) {
     return false;
   }
 
+  // пол как визуальный ориентир
+  const floor = new Mesh(
+    new PlaneGeometry(maxX * 2, 0.3),
+    new MeshStandardMaterial({ color: 0x333333 })
+  );
+  floor.position.set(0, -maxY, 0);
+
+  const group = new Object3D();
+  group.add(mesh);
+  group.add(floor);
+
   return {
-    mesh,
+    mesh: group,
     update,
     handleClick
   };
 }
-
