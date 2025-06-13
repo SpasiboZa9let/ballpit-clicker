@@ -1,21 +1,40 @@
-import * as THREE from 'https://cdn.skypack.dev/three@0.152.2';
+import {
+  InstancedMesh,
+  SphereGeometry,
+  MeshStandardMaterial,
+  Object3D,
+  Vector3
+} from 'three';
 
-export function createBalls(count, spawnY = 5) {
-  const positions = [];
-  const velocities = [];
-  const spawn = new THREE.Vector3(0, spawnY, 0);
+export class Spawner {
+  constructor({ count }) {
+    this.count = count;
+    this.balls = [];
 
-  for (let i = 0; i < count; i++) {
-    const pos = spawn.clone();
-    const vel = new THREE.Vector3(
-      (Math.random() - 0.5) * 0.3,
-      -Math.random() * 0.3,
-      0
-    );
-    positions.push(pos);
-    velocities.push(vel);
+    const geometry = new SphereGeometry(0.5, 16, 16);
+    const material = new MeshStandardMaterial({ color: 0x6699ff });
+
+    this.mesh = new InstancedMesh(geometry, material, count);
+    this.dummy = new Object3D();
+
+    for (let i = 0; i < count; i++) {
+      const obj = new Object3D();
+      obj.position.set(
+        (Math.random() - 0.5) * 5,
+        (Math.random() - 0.5) * 5,
+        (Math.random() - 0.5) * 5
+      );
+      obj.velocity = new Vector3(
+        (Math.random() - 0.5) * 0.1,
+        (Math.random() - 0.5) * 0.1,
+        (Math.random() - 0.5) * 0.1
+      );
+      obj.index = i;
+      obj.updateMatrix();
+      this.mesh.setMatrixAt(i, obj.matrix);
+      this.balls.push(obj);
+    }
+
+    this.mesh.instanceMatrix.needsUpdate = true;
   }
-
-  return { positions, velocities };
 }
-
