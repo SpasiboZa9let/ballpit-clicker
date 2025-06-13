@@ -1,5 +1,5 @@
 import * as THREE from 'https://cdn.skypack.dev/three@0.152.2';
-import  createRenderer  from './renderer.js';
+import createRenderer from './renderer.js';
 import { Engine } from './physics/engine.js';
 
 export default function Ballpit(canvas, options = {}) {
@@ -9,35 +9,32 @@ export default function Ballpit(canvas, options = {}) {
   const scene = renderer.scene;
   const camera = renderer.camera;
 
-  const maxX = window.innerWidth / 100;
-  const maxY = window.innerHeight / 100;
+  // Размеры арены с возможностью переопределения
+  const maxX = options.maxX ?? window.innerWidth / 100;
+  const maxY = options.maxY ?? window.innerHeight / 100;
 
- const maxX = options.maxX ?? window.innerWidth / 100;
-const maxY = options.maxY ?? window.innerHeight / 100;
+  // Центр камеры и отдаление
+  camera.position.set(0, 0, Math.max(maxX, maxY) * 2.5);
+  camera.lookAt(0, 0, 0);
 
-// Центрируем камеру по X и Y, и ставим Z на нужную глубину
-camera.position.set(0, 0, Math.max(maxX, maxY) * 2.5);
-camera.lookAt(0, 0, 0);
-
-
+  // Движок физики
   const engine = new Engine({
-    count: options.count || 100,
+    count: options.count ?? 100,
     maxX,
     maxY,
-    gravity: options.gravity ?? 0.3,
-    friction: options.friction ?? 0.95,
-    wallBounce: options.wallBounce ?? 0.9,
-    followCursor: options.followCursor ?? true,
+    gravity: options.gravity ?? 0.05,
+    friction: options.friction ?? 0.9,
+    wallBounce: options.wallBounce ?? 0.75,
+    followCursor: options.followCursor ?? false,
   });
 
   scene.add(engine.mesh);
 
+  // Анимация
   renderer.onFrame((delta) => {
     engine.update(delta);
     renderer.render();
   });
-
-  window.addEventListener('resize', () => location.reload());
 
   return {
     dispose() {
