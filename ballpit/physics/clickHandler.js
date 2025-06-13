@@ -1,7 +1,7 @@
 import * as THREE from 'https://cdn.skypack.dev/three@0.152.2';
 
-export function createClickHandler(instancedMesh, velocities) {
-  return function handleClick(event, camera, raycaster) {
+export function createClickHandler(instancedMesh, balls) {
+  return function (event, camera, raycaster) {
     const rect = raycaster.domElement?.getBoundingClientRect?.() || {
       left: 0, top: 0, width: window.innerWidth, height: window.innerHeight
     };
@@ -17,11 +17,8 @@ export function createClickHandler(instancedMesh, velocities) {
     if (intersects.length > 0) {
       const index = intersects[0].instanceId;
       if (index !== undefined) {
-        velocities[index].add(new THREE.Vector3(0, 1, 0));
-        return true;
+        balls[index].velocity.y += 1;
       }
     }
-
-    return false;
   };
 }
