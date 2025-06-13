@@ -5,7 +5,6 @@ import { Engine } from './physics/engine.js';
 export default function Ballpit(canvas, options = {}) {
   const container = canvas.parentNode;
 
-  // Получаем реальные размеры
   const width = container.clientWidth;
   const height = container.clientHeight;
   const aspect = width / height;
@@ -14,23 +13,21 @@ export default function Ballpit(canvas, options = {}) {
   const scene = renderer.scene;
   const camera = renderer.camera;
 
-  // Настраиваем размеры арены (в логических единицах, например, 1 юнит = 100px)
-  const maxX = options.maxX ?? width / 100;
-  const maxY = options.maxY ?? height / 100;
-
-  // Центр камеры и отдаление (по глубине относительно диагонали арены)
-  const viewSize = Math.max(maxX, maxY);
-  camera.left = -viewSize * aspect;
-  camera.right = viewSize * aspect;
-  camera.top = viewSize;
-  camera.bottom = -viewSize;
+  // Центрированная ортографическая камера
+  const viewSize = options.viewSize ?? 10;
+  camera.left = (-aspect * viewSize) / 2;
+  camera.right = (aspect * viewSize) / 2;
+  camera.top = viewSize / 2;
+  camera.bottom = -viewSize / 2;
   camera.near = 0.1;
   camera.far = 1000;
-  camera.position.set(0, 0, viewSize * 2);
+  camera.position.set(0, 0, 10);
   camera.lookAt(0, 0, 0);
   camera.updateProjectionMatrix();
 
-  // Движок физики
+  const maxX = (camera.right - camera.left) / 2;
+  const maxY = (camera.top - camera.bottom) / 2;
+
   const engine = new Engine({
     count: options.count ?? 100,
     maxX,
