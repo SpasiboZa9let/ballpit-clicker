@@ -1,13 +1,10 @@
 import * as THREE from 'https://cdn.skypack.dev/three@0.152.2';
 
-function createRenderer(container) {
+export default function createRenderer(container) {
   const scene = new THREE.Scene();
 
-  const camera = new THREE.PerspectiveCamera(
-    45,
-    container.clientWidth / container.clientHeight,
-    0.1,
-    100
+  const camera = new THREE.OrthographicCamera(
+    -1, 1, 1, -1, 0.1, 100
   );
 
   const renderer = new THREE.WebGLRenderer({
@@ -18,7 +15,9 @@ function createRenderer(container) {
 
   renderer.setSize(container.clientWidth, container.clientHeight);
   renderer.setPixelRatio(window.devicePixelRatio);
-  renderer.outputEncoding = THREE.sRGBEncoding;
+
+  // 🔄 Новое свойство вместо .outputEncoding
+  renderer.outputColorSpace = THREE.SRGBColorSpace;
   renderer.toneMapping = THREE.ACESFilmicToneMapping;
 
   // Свет
@@ -44,5 +43,3 @@ function createRenderer(container) {
     dispose: () => renderer.dispose(),
   };
 }
-
-export default createRenderer;
