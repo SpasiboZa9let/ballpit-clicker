@@ -1,43 +1,48 @@
 import * as THREE from 'https://cdn.skypack.dev/three@0.152.2';
-import { createRenderer } from './renderer.js';
-import { Engine } from './physics/engine.js';
 
-export default function Ballpit(canvas, options = {}) {
-  const container = canvas.parentNode;
+function createRenderer(container) {
+  const scene = new THREE.Scene();
 
-  const renderer = createRenderer(container);
-  const scene = renderer.scene;
-  const camera = renderer.camera;
+  const camera = new THREE.PerspectiveCamera(
+    45,
+    container.clientWidth / container.clientHeight,
+    0.1,
+    100
+  );
 
-  const maxX = window.innerWidth / 100;
-  const maxY = window.innerHeight / 100;
-
-  camera.position.set(0, 0, Math.max(maxX, maxY) * 2.5);
-  camera.lookAt(0, 0, 0);
-
-  const engine = new Engine({
-    count: options.count || 100,
-    maxX,
-    maxY,
-    gravity: options.gravity ?? 0.3,
-    friction: options.friction ?? 0.95,
-    wallBounce: options.wallBounce ?? 0.9,
-    followCursor: options.followCursor ?? true,
+  const renderer = new THREE.WebGLRenderer({
+    canvas: container.querySelector('canvas'),
+    antialias: true,
+    alpha: true
   });
 
-  scene.add(engine.mesh);
+  renderer.setSize(container.clientWidth, container.clientHeight);
+  renderer.setPixelRatio(window.devicePixelRatio);
+  renderer.outputEncoding = THREE.sRGBEncoding;
+  renderer.toneMapping = THREE.ACESFilmicToneMapping;
 
-  renderer.onFrame((delta) => {
-    engine.update(delta);
-    renderer.render();
-  });
+  // Свет
+  const ambient = new THREE.AmbientLight(0xffffff, 0.4);
+  const directional = new THREE.DirectionalLight(0xffffff, 0.8);
+  directional.position.set(5, 5, 10);
+  scene.add(ambient, directional);
 
-  window.addEventListener('resize', () => location.reload());
+  // Анимация
+  let onFrame = () => {};
+  function animate(time) {
+    requestAnimationFrame(animate);
+    onFrame(time / 1000);
+  }
+  animate();
 
   return {
-    dispose() {
-      renderer.dispose();
-      engine.dispose();
-    }
+    scene,
+    camera,
+    renderer,
+    onFrame: fn => (onFrame = fn),
+    render: () => renderer.render(scene, camera),
+    dispose: () => renderer.dispose(),
   };
 }
+
+export default createRenderer;
