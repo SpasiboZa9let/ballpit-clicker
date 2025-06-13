@@ -5,17 +5,30 @@ import { Engine } from './physics/engine.js';
 export default function Ballpit(canvas, options = {}) {
   const container = canvas.parentNode;
 
+  // Получаем реальные размеры
+  const width = container.clientWidth;
+  const height = container.clientHeight;
+  const aspect = width / height;
+
   const renderer = createRenderer(container);
   const scene = renderer.scene;
   const camera = renderer.camera;
 
-  // Размеры арены с возможностью переопределения
-  const maxX = options.maxX ?? window.innerWidth / 100;
-  const maxY = options.maxY ?? window.innerHeight / 100;
+  // Настраиваем размеры арены (в логических единицах, например, 1 юнит = 100px)
+  const maxX = options.maxX ?? width / 100;
+  const maxY = options.maxY ?? height / 100;
 
-  // Центр камеры и отдаление
-  camera.position.set(0, 0, Math.max(maxX, maxY) * 2.5);
+  // Центр камеры и отдаление (по глубине относительно диагонали арены)
+  const viewSize = Math.max(maxX, maxY);
+  camera.left = -viewSize * aspect;
+  camera.right = viewSize * aspect;
+  camera.top = viewSize;
+  camera.bottom = -viewSize;
+  camera.near = 0.1;
+  camera.far = 1000;
+  camera.position.set(0, 0, viewSize * 2);
   camera.lookAt(0, 0, 0);
+  camera.updateProjectionMatrix();
 
   // Движок физики
   const engine = new Engine({
@@ -30,7 +43,6 @@ export default function Ballpit(canvas, options = {}) {
 
   scene.add(engine.mesh);
 
-  // Анимация
   renderer.onFrame((delta) => {
     engine.update(delta);
     renderer.render();
